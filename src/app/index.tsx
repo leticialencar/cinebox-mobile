@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import {
-  View,
   Animated,
-  StatusBar,
   ImageBackground,
+  StatusBar,
   StyleSheet,
+  View,
 } from 'react-native';
 import CineBoxLogo from '../components/logo/CineBoxLogo';
 import PrimaryButton from '../components/Primarybutton';
