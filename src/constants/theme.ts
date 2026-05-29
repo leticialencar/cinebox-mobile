@@ -1,65 +1,71 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
+export const colors = {
+  bg: '#0b0b1f',
+  bgCard: 'rgba(255,255,255,0.03)',
+  bgCardHover: 'rgba(255,255,255,0.06)',
+  accent: '#8042e8',
+  accentLight: 'rgba(128,66,232,0.15)',
+  accentBorder: 'rgba(128,66,232,0.2)',
+  accentMid: '#a855f7',
+  white: '#ffffff',
+  textPrimary: '#ffffff',
+  textSecondary: 'rgba(255,255,255,0.55)',
+  textMuted: 'rgba(255,255,255,0.35)',
+  border: 'rgba(255,255,255,0.07)',
+  borderStrong: 'rgba(255,255,255,0.12)',
+  rating: '#c084fc',
+  overlay: 'rgba(11,11,31,0.85)',
+} as const;
 
-import '@/global.css';
+export const spacing = {
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  xxl: 24,
+} as const;
 
-import { Platform } from 'react-native';
+export const radius = {
+  sm: 8,
+  md: 10,
+  lg: 14,
+  xl: 20,
+  full: 999,
+} as const;
+
+export const typography = {
+  xs: 10,
+  sm: 11,
+  base: 13,
+  md: 14,
+  lg: 16,
+  xl: 18,
+  xxl: 22,
+  hero: 26,
+} as const;
+
+export const fonts = {
+  regular: 'System',
+  medium: 'System',
+  bold: 'System',
+  mono: 'monospace',
+};
 
 export const Colors = {
   light: {
-    text: '#000000',
     background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    backgroundElement: '#8042e8',
+    text: '#0b0b1f',
+    tint: '#8042e8',
+    tabIconDefault: '#999',
+    tabIconSelected: '#8042e8',
   },
   dark: {
+    background: '#0b0b1f',
+    backgroundElement: '#8042e8',
     text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    tint: '#8042e8',
+    tabIconDefault: '#666',
+    tabIconSelected: '#a855f7',
   },
 } as const;
-
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
-
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
-    mono: 'var(--font-mono)',
-  },
-});
-
-export const Spacing = {
-  half: 2,
-  one: 4,
-  two: 8,
-  three: 16,
-  four: 24,
-  five: 32,
-  six: 64,
-} as const;
-
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
-export const MaxContentWidth = 800;
