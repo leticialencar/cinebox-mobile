@@ -7,8 +7,8 @@ import {
   View,
 } from 'react-native';
 import CineBoxLogo from '../components/logo/CineBoxLogo';
-import PrimaryButton from '../components/Primarybutton';
-import SecondaryButton from '../components/Secondarybutton';
+import PrimaryButton from '../components/PrimaryButton';
+import SecondaryButton from '../components/SecondaryButton';
 
 export default function CineBoxSplash({ navigation }: { navigation?: any }) {
   const fadeAnim  = useRef(new Animated.Value(0)).current;

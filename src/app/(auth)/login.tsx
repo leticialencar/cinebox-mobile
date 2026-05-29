@@ -1,6 +1,6 @@
 import { FormField } from '@/components/FormField';
 import { BrandLogo } from '@/components/logo/BrandLogo';
-import PrimaryButton from '../../components/Primarybutton';
+import PrimaryButton from '../../components/PrimaryButton';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
