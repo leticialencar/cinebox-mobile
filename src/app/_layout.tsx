@@ -1,12 +1,12 @@
 import { Stack } from 'expo-router';
+import { View } from 'react-native';
+import { NavBar } from '@/components/navigation/NavBar';
 
-export default function RootLayout() {
+export default function ProtectedLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        animation: 'fade',
-      }}
-    />
+    <View style={{ flex: 1 }}>
+      <Stack screenOptions={{ headerShown: false, animation: 'fade' }} />
+      <NavBar />
+    </View>
   );
 }
