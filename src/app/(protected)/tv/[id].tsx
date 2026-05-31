@@ -7,6 +7,7 @@ import { MediaInfoGrid } from '@/components/media/MediaInfoGrid';
 import { RatingCard } from '@/components/media/RatingCard';
 import { ReviewModal } from '@/components/media/ReviewModal';
 import { TrailerPlayer } from '@/components/media/TrailerPlayer';
+import { MediaDetail } from '@/types/media';
 import Storage from '@/utils/storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -21,42 +22,10 @@ import {
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-type CastMember = {
-  id: number;
-  name: string;
-  character: string | null;
-  profile: string | null;
-};
-
-type UserData = {
-  id: number;
-  is_favorite: boolean;
-  user_rating: number | null;
-  review: string | null;
-} | null;
-
-type SeriesDetail = {
-  type: string;
-  title: string;
-  description: string;
-  poster: string | null;
-  backdrop: string | null;
-  rating: string;
-  release: string | null;
-  director: string;
-  writer: string;
-  studios: string;
-  trailer: string | null;
-  hours: number | null;
-  minutes: number | null;
-  cast: CastMember[];
-  userData: UserData;
-};
-
 export default function SeriesDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const [data, setData] = useState<SeriesDetail | null>(null);
+  const [data, setData] = useState<MediaDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -76,7 +45,7 @@ export default function SeriesDetailScreen() {
       const res = await fetch(`${API_URL}/media/tv/${id}`, {
         headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
       });
-      const json: SeriesDetail = await res.json();
+      const json: MediaDetail = await res.json();
       setData(json);
       setUserRating(json.userData?.user_rating ?? 0);
       setReview(json.userData?.review ?? '');
@@ -167,6 +136,7 @@ export default function SeriesDetailScreen() {
 
           <MediaInfoGrid
             description={data.description}
+            genres={data.genres}
             director={data.director}
             writer={data.writer}
             studios={data.studios}

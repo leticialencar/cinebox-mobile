@@ -1,21 +1,20 @@
-import { BrandLogo } from '@/components/logo/BrandLogo';
-import { HomeHero }   from '@/components/home/HomeHero';
-import { Section }    from '@/components/home/Section';
+import { HomeHero } from '@/components/home/HomeHero';
+import { Section } from '@/components/home/Section';
+import { TopBar } from '@/components/navigation/TopBar';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Platform, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
 import type { MediaItem } from '../../types/media';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
-const BG      = '#080511';
-const PURPLE  = '#7c3aed';
-const HDR_TOP = Platform.OS === 'ios' ? 54 : 36;
+const BG     = '#080511';
+const PURPLE = '#7c3aed';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const [popular, setPopular]   = useState<MediaItem[]>([]);
+  const [popular,  setPopular]  = useState<MediaItem[]>([]);
   const [featured, setFeatured] = useState<MediaItem | null>(null);
-  const [loading, setLoading]   = useState(true);
+  const [loading,  setLoading]  = useState(true);
 
   useEffect(() => { fetchPopular(); }, []);
 
@@ -44,9 +43,7 @@ export default function HomeScreen() {
     <View style={s.root}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
-      <View style={s.logoWrapper}>
-        <BrandLogo size="sm" />
-      </View>
+      <TopBar />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {featured && (
@@ -67,7 +64,6 @@ export default function HomeScreen() {
 }
 
 const s = StyleSheet.create({
-  root:        { flex: 1, backgroundColor: BG },
-  center:      { flex: 1, backgroundColor: BG, alignItems: 'center', justifyContent: 'center' },
-  logoWrapper: { position: 'absolute', top: HDR_TOP, left: 20, zIndex: 50 },
+  root:   { flex: 1, backgroundColor: BG },
+  center: { flex: 1, backgroundColor: BG, alignItems: 'center', justifyContent: 'center' },
 });

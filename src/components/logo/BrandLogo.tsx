@@ -1,12 +1,12 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import PlayIcon from '@/components/logo/PlayIcon';
 
-type Props = { size?: 'sm' | 'md' };
+type Props = { size?: 'sm' | 'md'; style?: ViewStyle };
 
-export function BrandLogo({ size = 'md' }: Props) {
+export function BrandLogo({ size = 'md', style }: Props) {
   const sm = size === 'sm';
   return (
-    <View style={styles.logoRow}>
+    <View style={[styles.logoRow, style]}>
       <View style={[styles.iconBadge, sm && { width: 22, height: 22, borderRadius: 6 }]}>
         <PlayIcon size="sm" />
       </View>

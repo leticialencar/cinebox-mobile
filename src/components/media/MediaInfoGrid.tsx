@@ -5,15 +5,21 @@ type Props = {
   director: string;
   writer: string;
   studios: string;
+  genres: string;
 };
 
-export function MediaInfoGrid({ description, director, writer, studios }: Props) {
+export function MediaInfoGrid({ description, director, writer, studios, genres }: Props) {
   return (
     <>
       <Text style={styles.sectionLabel}>Sinopse</Text>
       <Text style={styles.description}>{description || 'Sinopse não disponível.'}</Text>
       <View style={styles.grid}>
-        {[{ label: 'Diretor', value: director }, { label: 'Roteiro', value: writer }, { label: 'Estúdio', value: studios }].map(({ label, value }) => (
+        {[
+          { label: 'Gênero',  value: genres },
+          { label: 'Diretor', value: director },
+          { label: 'Roteiro', value: writer },
+          { label: 'Estúdio', value: studios },
+        ].map(({ label, value }) => (
           <View key={label} style={styles.card}>
             <Text style={styles.cardLabel}>{label}</Text>
             <Text style={styles.cardValue}>{value || '—'}</Text>
