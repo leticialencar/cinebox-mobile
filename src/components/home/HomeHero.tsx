@@ -1,5 +1,5 @@
-import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { MediaItem } from '../../types/media';
 
 const { width: W, height: H } = Dimensions.get('window');
@@ -7,7 +7,7 @@ const BG = '#080511';
 export const HERO_H = H * 0.68;
 
 type Props = {
-  item: MediaItem;
+  item: MediaItem & { inCollection?: boolean };
   onPress: () => void;
 };
 
@@ -42,8 +42,14 @@ export function HomeHero({ item, onPress }: Props) {
           <Text style={s.meta}>★ {item.vote_average}</Text>
         </View>
         <View style={s.btns}>
-          <TouchableOpacity style={s.btnPrimary} onPress={onPress} activeOpacity={0.85}>
-            <Text style={s.btnPrimaryTxt}>+  Salvar</Text>
+          <TouchableOpacity
+            style={[s.btnPrimary, item.inCollection && s.btnSaved]}
+            onPress={onPress}
+            activeOpacity={0.85}
+          >
+            <Text style={s.btnPrimaryTxt}>
+              {item.inCollection ? '✓  Na coleção' : '+  Salvar'}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity style={s.btnSecondary} onPress={onPress} activeOpacity={0.85}>
             <Text style={s.btnSecondaryTxt}>Saiba mais</Text>
@@ -55,11 +61,11 @@ export function HomeHero({ item, onPress }: Props) {
 }
 
 const s = StyleSheet.create({
-  hero:       { width: W, height: HERO_H, position: 'relative' },
-  img:        { position: 'absolute', width: '100%', height: '100%' },
-  gradTop:    { position: 'absolute', top: 0, left: 0, right: 0, height: 160 },
+  hero: { width: W, height: HERO_H, position: 'relative' },
+  img: { position: 'absolute', width: '100%', height: '100%' },
+  gradTop: { position: 'absolute', top: 0, left: 0, right: 0, height: 160 },
   gradBottom: { position: 'absolute', bottom: 0, left: 0, right: 0, height: HERO_H * 0.55 },
-  content:    { position: 'absolute', bottom: 0.2, left: 20, right: 20, alignItems: 'center' },
+  content: { position: 'absolute', bottom: 0.2, left: 20, right: 20, alignItems: 'center' },
   title: {
     color: '#fff', fontSize: 26, fontWeight: '800',
     letterSpacing: -0.5, lineHeight: 31, marginBottom: 8,
@@ -67,9 +73,9 @@ const s = StyleSheet.create({
     textShadowColor: 'rgba(0,0,0,0.9)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 12,
-    },
-  row:  { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 },
-  dot:  { width: 3, height: 3, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.22)' },
+  },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 },
+  dot: { width: 3, height: 3, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.22)' },
   meta: { color: 'rgba(255,255,255,0.5)', fontSize: 13 },
   btns: { flexDirection: 'row', gap: 10, justifyContent: 'center' },
   btnPrimary: {
@@ -78,7 +84,12 @@ const s = StyleSheet.create({
     paddingHorizontal: 24,
     borderRadius: 10,
     alignItems: 'center',
-    },
+  },
+  btnSaved: {
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
   btnPrimaryTxt: { color: '#fff', fontSize: 14, fontWeight: '700' },
   btnSecondary: {
     paddingVertical: 10,

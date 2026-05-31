@@ -1,5 +1,6 @@
 import { HomeHero } from '@/components/home/HomeHero';
 import { Section } from '@/components/home/Section';
+import { UpcomingSection } from '@/components/home/UpcomingSection';
 import { TopBar } from '@/components/navigation/TopBar';
 import { api } from '@/services/api';
 import Storage from '@/utils/storage';
@@ -7,7 +8,6 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
 import type { MediaItem } from '../../types/media';
-import { UpcomingSection } from '@/components/home/UpcomingSection';
 
 const BG = '#080511';
 const PURPLE = '#7c3aed';
@@ -16,20 +16,32 @@ export default function HomeScreen() {
   const router = useRouter();
   const [popular, setPopular] = useState<MediaItem[]>([]);
   const [featured, setFeatured] = useState<MediaItem | null>(null);
+  const [savedIds, setSavedIds] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { fetchPopular(); }, []);
+  useEffect(() => { fetchData(); }, []);
 
-  async function fetchPopular() {
+  async function fetchData() {
     try {
       const token = await Storage.get('token');
-      const { data } = await api.get('/media/popular', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setPopular(data);
-      setFeatured(data.find((m: MediaItem) => m.backdrop) ?? data[0] ?? null);
+      const headers = { Authorization: `Bearer ${token}` };
+
+      const [{ data: popularData }, { data: collection }] = await Promise.all([
+        api.get('/media/popular', { headers }),
+        api.get('/movies', { headers }),
+      ]);
+
+      setPopular(popularData);
+      setFeatured(popularData.find((m: MediaItem) => m.backdrop) ?? popularData[0] ?? null);
+
+      const ids = new Set<number>(
+        (collection.collection ?? collection).map((m: any) => Number(m.tmdb_id))
+      );
+      setSavedIds(ids);
     } catch {
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   }
 
   function goToDetail(id: number, type: 'movie' | 'tv') {
@@ -52,7 +64,7 @@ export default function HomeScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {featured && (
           <HomeHero
-            item={featured}
+            item={{ ...featured, inCollection: savedIds.has(featured.id) }}
             onPress={() => goToDetail(featured.id, featured.media_type)}
           />
         )}
@@ -62,7 +74,6 @@ export default function HomeScreen() {
         <Section title="Séries em alta" data={shows} onPress={goToDetail} />
         <View style={{ height: 40 }} />
         <UpcomingSection onPress={(id) => goToDetail(id, 'movie')} />
-
       </ScrollView>
     </View>
   );

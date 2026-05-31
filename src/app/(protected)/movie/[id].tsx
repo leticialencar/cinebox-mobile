@@ -147,7 +147,7 @@ export default function MovieDetailScreen() {
 
           <TrailerPlayer videoId={data.trailer} />
 
-          <View style={{ height: 80 }} />
+          <View style={{ height: 20 }} />
         </View>
       </ScrollView>
 
