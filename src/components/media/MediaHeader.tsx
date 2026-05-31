@@ -17,7 +17,7 @@ export function MediaHeader({ title, poster, rating, release, hours, minutes, ba
       <View style={styles.info}>
         <Text style={styles.title}>{title}</Text>
         <View style={styles.metaRow}>
-          <Text style={styles.metaText}>⭐ {rating}</Text>
+          <Text style={styles.metaText}>★ {rating}</Text>
           {release && <Text style={styles.metaText}>{release.slice(0, 4)}</Text>}
           {hours != null && <Text style={styles.metaText}>{hours}h {minutes}min</Text>}
           {badge && (
