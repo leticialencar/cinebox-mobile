@@ -1,14 +1,14 @@
 import Storage from '@/utils/storage';
+import { api } from '@/services/api';
 import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { FlatList, Platform, StatusBar, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { MediaRow } from '@/components/search/MediaRow';
 import { SearchBar } from '@/components/search/SearchBar';
 import { SearchEmptyState } from '@/components/search/SearchEmptyState';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
-const BG      = '#080511';
+const BG = '#080511';
 const HDR_TOP = Platform.OS === 'ios' ? 54 : 36;
 
 type MediaItem = {
@@ -20,12 +20,12 @@ type MediaItem = {
 };
 
 export default function SearchScreen() {
-  const router   = useRouter();
+  const router = useRouter();
   const inputRef = useRef<TextInput>(null) as React.RefObject<TextInput>;
-  const timeout  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [query,     setQuery]     = useState('');
-  const [results,   setResults]   = useState<MediaItem[]>([]);
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<MediaItem[]>([]);
   const [searching, setSearching] = useState(false);
 
   async function handleSearch(text: string) {
@@ -37,10 +37,11 @@ export default function SearchScreen() {
       setSearching(true);
       try {
         const token = await Storage.get('token');
-        const res   = await fetch(`${API_URL}/media/search?q=${encodeURIComponent(text)}`, {
-          headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        const { data } = await api.get('/media/search', {
+          params: { q: text },
+          headers: { Authorization: `Bearer ${token}` },
         });
-        setResults(await res.json());
+        setResults(data);
       } catch {
       } finally { setSearching(false); }
     }, 400);
@@ -55,8 +56,8 @@ export default function SearchScreen() {
     setResults([]);
   }
 
-  const showInitial   = query.length === 0;
-  const showResults   = query.length >= 2 && results.length > 0;
+  const showInitial = query.length === 0;
+  const showResults = query.length >= 2 && results.length > 0;
   const showNoResults = query.length >= 2 && !searching && results.length === 0;
 
   return (
@@ -73,7 +74,7 @@ export default function SearchScreen() {
         />
       </View>
 
-      {showInitial   && <SearchEmptyState type="initial" />}
+      {showInitial && <SearchEmptyState type="initial" />}
       {showNoResults && <SearchEmptyState type="no-results" />}
 
       {showResults && (
@@ -95,8 +96,8 @@ export default function SearchScreen() {
 }
 
 const s = StyleSheet.create({
-  root:         { flex: 1, backgroundColor: BG },
-  header:       { paddingTop: HDR_TOP, paddingHorizontal: 16, paddingBottom: 12, backgroundColor: BG },
-  list:         { paddingHorizontal: 16, paddingBottom: 120 },
+  root: { flex: 1, backgroundColor: BG },
+  header: { paddingTop: HDR_TOP, paddingHorizontal: 16, paddingBottom: 12, backgroundColor: BG },
+  list: { paddingHorizontal: 16, paddingBottom: 120 },
   sectionLabel: { color: '#fff', fontSize: 15, fontWeight: '700', marginBottom: 12, marginTop: 4 },
 });

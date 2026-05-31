@@ -1,4 +1,5 @@
 import Storage from '@/utils/storage';
+import { api } from '@/services/api';
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
@@ -16,9 +17,8 @@ import {
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
-const BG      = '#080511';
-const PURPLE  = '#7c3aed';
+const BG = '#080511';
+const PURPLE = '#7c3aed';
 const HDR_TOP = Platform.OS === 'ios' ? 54 : 36;
 
 type User = {
@@ -53,8 +53,8 @@ function MenuItem({ icon, label, onPress, danger }: {
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const [user,            setUser]            = useState<User | null>(null);
-  const [loading,         setLoading]         = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   useEffect(() => { loadUser(); }, []);
@@ -103,23 +103,16 @@ export default function ProfileScreen() {
         } as any);
       }
 
-      const res = await fetch(`${API_URL}/user/avatar`, {
-        method: 'POST',
+      const { data } = await api.post('/user/avatar', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
+          'Content-Type': 'multipart/form-data',
         },
-        body: formData,
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        const updatedUser = { ...user!, avatar: data.user.avatar };
-        setUser(updatedUser);
-        await Storage.set('user', JSON.stringify(updatedUser));
-      } else {
-        Alert.alert('Erro', 'Não foi possível atualizar a foto.');
-      }
+      const updatedUser = { ...user!, avatar: data.user.avatar };
+      setUser(updatedUser);
+      await Storage.set('user', JSON.stringify(updatedUser));
     } catch {
       Alert.alert('Erro', 'Não foi possível atualizar a foto.');
     } finally {
@@ -131,12 +124,11 @@ export default function ProfileScreen() {
     const doLogout = async () => {
       try {
         const token = await Storage.get('token');
-        await fetch(`${API_URL}/logout`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        await api.post('/logout', {}, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-      } catch (e) {
-        console.log('Erro logout:', e);
+      } catch {
+        console.log('Erro logout');
       }
       await Storage.delete('token');
       await Storage.delete('user');
@@ -177,7 +169,6 @@ export default function ProfileScreen() {
                 <Text style={s.avatarInitials}>{initials}</Text>
               </View>
             )}
-
             <View style={s.avatarEditBtn}>
               {uploadingAvatar
                 ? <ActivityIndicator size="small" color="#fff" />
@@ -233,13 +224,11 @@ export default function ProfileScreen() {
 }
 
 const s = StyleSheet.create({
-  root:   { flex: 1, backgroundColor: BG },
+  root: { flex: 1, backgroundColor: BG },
   center: { flex: 1, backgroundColor: BG, alignItems: 'center', justifyContent: 'center' },
-
-  header:      { paddingTop: HDR_TOP, paddingHorizontal: 20, paddingBottom: 8 },
+  header: { paddingTop: HDR_TOP, paddingHorizontal: 20, paddingBottom: 8 },
   headerTitle: { color: '#fff', fontSize: 22, fontWeight: '800' },
-
-  profileCard:   { alignItems: 'center', paddingVertical: 32, paddingHorizontal: 20 },
+  profileCard: { alignItems: 'center', paddingVertical: 32, paddingHorizontal: 20 },
   avatarWrapper: { position: 'relative', marginBottom: 16 },
   avatarPlaceholder: {
     width: 90, height: 90, borderRadius: 45,
@@ -252,23 +241,21 @@ const s = StyleSheet.create({
     borderWidth: 3, borderColor: 'rgba(124,58,237,0.3)',
   },
   avatarInitials: { color: '#fff', fontSize: 32, fontWeight: '800' },
-  avatarEditBtn:  {
+  avatarEditBtn: {
     position: 'absolute', bottom: 0, right: 0,
     width: 28, height: 28, borderRadius: 14,
     backgroundColor: '#5b21b6',
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 2, borderColor: BG,
   },
-  profileName:  { color: '#fff', fontSize: 20, fontWeight: '800', marginBottom: 4 },
+  profileName: { color: '#fff', fontSize: 20, fontWeight: '800', marginBottom: 4 },
   profileEmail: { color: 'rgba(255,255,255,0.4)', fontSize: 14 },
-
-  section:      { paddingHorizontal: 20, marginBottom: 8 },
+  section: { paddingHorizontal: 20, marginBottom: 8 },
   sectionLabel: { color: 'rgba(255,255,255,0.35)', fontSize: 12, fontWeight: '600', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 },
-  card:         { backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', overflow: 'hidden' },
-
-  menuItem:        { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16 },
-  menuIcon:        { width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(124,58,237,0.1)', alignItems: 'center', justifyContent: 'center' },
-  menuIconDanger:  { backgroundColor: 'rgba(239,68,68,0.1)' },
-  menuLabel:       { flex: 1, color: '#fff', fontSize: 15, fontWeight: '500' },
+  card: { backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', overflow: 'hidden' },
+  menuItem: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16 },
+  menuIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(124,58,237,0.1)', alignItems: 'center', justifyContent: 'center' },
+  menuIconDanger: { backgroundColor: 'rgba(239,68,68,0.1)' },
+  menuLabel: { flex: 1, color: '#fff', fontSize: 15, fontWeight: '500' },
   menuLabelDanger: { flex: 1, color: '#f87171', fontSize: 15, fontWeight: '500' },
 });

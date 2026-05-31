@@ -8,6 +8,7 @@ import { RatingCard } from '@/components/media/RatingCard';
 import { ReviewModal } from '@/components/media/ReviewModal';
 import { TrailerPlayer } from '@/components/media/TrailerPlayer';
 import { MediaDetail } from '@/types/media';
+import { api } from '@/services/api';
 import Storage from '@/utils/storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -19,8 +20,6 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function MovieDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -39,13 +38,16 @@ export default function MovieDetailScreen() {
     return await Storage.get('token');
   }
 
+  async function authHeaders() {
+    const token = await getToken();
+    return { Authorization: `Bearer ${token}` };
+  }
+
   async function fetchDetail() {
     try {
-      const token = await getToken();
-      const res = await fetch(`${API_URL}/media/movie/${id}`, {
-        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+      const { data: json } = await api.get<MediaDetail>(`/media/movie/${id}`, {
+        headers: await authHeaders(),
       });
-      const json: MediaDetail = await res.json();
       setData(json);
       setUserRating(json.userData?.user_rating ?? 0);
       setReview(json.userData?.review ?? '');
@@ -58,22 +60,21 @@ export default function MovieDetailScreen() {
 
   async function handleAddToCollection() {
     if (!data) return;
-    const token = await getToken();
-    const res = await fetch(`${API_URL}/movies/store-from-api`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tmdb_id: id, title: data.title, poster: data.poster, media_type: 'movie' }),
-    });
-    if (res.ok) { Alert.alert('Sucesso', 'Adicionado à coleção!'); fetchDetail(); }
-    else { const err = await res.json(); Alert.alert('Aviso', err.message ?? 'Erro ao adicionar.'); }
+    try {
+      await api.post('/movies/store-from-api', {
+        tmdb_id: id, title: data.title, poster: data.poster, media_type: 'movie',
+      }, { headers: await authHeaders() });
+      Alert.alert('Sucesso', 'Adicionado à coleção!');
+      fetchDetail();
+    } catch (error: any) {
+      Alert.alert('Aviso', error.response?.data?.message ?? 'Erro ao adicionar.');
+    }
   }
 
   async function handleToggleFavorite() {
     if (!data?.userData) return;
-    const token = await getToken();
-    await fetch(`${API_URL}/movies/${data.userData.id}/favorite`, {
-      method: 'PATCH',
-      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+    await api.patch(`/movies/${data.userData.id}/favorite`, {}, {
+      headers: await authHeaders(),
     });
     fetchDetail();
   }
@@ -81,23 +82,24 @@ export default function MovieDetailScreen() {
   async function handleSaveReview() {
     if (!data) return;
     setSaving(true);
-    const token = await getToken();
-    const res = await fetch(`${API_URL}/movies/save-or-update`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tmdb_id: id, title: data.title, poster: data.poster, media_type: 'movie', user_rating: userRating, review }),
-    });
-    setSaving(false);
-    if (res.ok) { setModalVisible(false); fetchDetail(); }
-    else Alert.alert('Erro', 'Não foi possível salvar a avaliação.');
+    try {
+      await api.post('/movies/save-or-update', {
+        tmdb_id: id, title: data.title, poster: data.poster,
+        media_type: 'movie', user_rating: userRating, review,
+      }, { headers: await authHeaders() });
+      setModalVisible(false);
+      fetchDetail();
+    } catch {
+      Alert.alert('Erro', 'Não foi possível salvar a avaliação.');
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function handleDelete() {
     if (!data?.userData) return;
-    const token = await getToken();
-    await fetch(`${API_URL}/movies/${data.userData.id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+    await api.delete(`/movies/${data.userData.id}`, {
+      headers: await authHeaders(),
     });
     setDeleteModalVisible(false);
     router.back();

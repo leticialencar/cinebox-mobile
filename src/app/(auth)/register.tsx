@@ -1,6 +1,7 @@
 import { BrandLogo } from '@/components/logo/BrandLogo';
 import { FormField } from '@/components/FormField';
 import PrimaryButton from '@/components/PrimaryButton';
+import { api } from '@/services/api';
 import Storage from '@/utils/storage';
 import { router, useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -15,8 +16,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function RegisterScreen() {
   const localRouter = useRouter();
@@ -43,38 +42,24 @@ export default function RegisterScreen() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-          password_confirmation: confirmPassword,
-        }),
+      const { data } = await api.post('/register', {
+        name,
+        email,
+        password,
+        password_confirmation: confirmPassword,
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        const firstError = data.errors
-          ? (Object.values(data.errors) as string[][])[0][0]
-          : data.message ?? 'Erro ao cadastrar.';
-        Alert.alert('Erro', firstError);
-        return;
-      }
 
       await Storage.set('token', data.token);
       await Storage.set('user', JSON.stringify(data.user));
 
       router.dismissAll();
       router.replace('/(protected)/home' as any);
-    } catch (err) {
-      console.log('CATCH:', err);
-      Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
+    } catch (error: any) {
+      const errors = error.response?.data?.errors;
+      const message = errors
+        ? (Object.values(errors) as string[][])[0][0]
+        : error.response?.data?.message ?? 'Erro ao cadastrar.';
+      Alert.alert('Erro', message);
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,7 @@
 import { FormField } from '@/components/FormField';
 import { BrandLogo } from '@/components/logo/BrandLogo';
 import PrimaryButton from '../../components/PrimaryButton';
+import { api } from '@/services/api';
 import { useRouter } from 'expo-router';
 import Storage from '@/utils/storage';
 import { useState } from 'react';
@@ -16,8 +17,6 @@ import {
   View,
 } from 'react-native';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
-
 export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -32,28 +31,15 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        Alert.alert('Erro', data.message ?? 'Credenciais inválidas.');
-        return;
-      }
+      const { data } = await api.post('/login', { email, password });
 
       await Storage.set('token', data.token);
       await Storage.set('user', JSON.stringify(data.user));
 
       router.replace('/(protected)/home');
-    } catch (e) {
-      Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
+    } catch (error: any) {
+      const message = error.response?.data?.message ?? 'Credenciais inválidas.';
+      Alert.alert('Erro', message);
     } finally {
       setLoading(false);
     }

@@ -1,29 +1,33 @@
 import { HomeHero } from '@/components/home/HomeHero';
 import { Section } from '@/components/home/Section';
 import { TopBar } from '@/components/navigation/TopBar';
+import { api } from '@/services/api';
+import Storage from '@/utils/storage';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
 import type { MediaItem } from '../../types/media';
+import { UpcomingSection } from '@/components/home/UpcomingSection';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
-const BG     = '#080511';
+const BG = '#080511';
 const PURPLE = '#7c3aed';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const [popular,  setPopular]  = useState<MediaItem[]>([]);
+  const [popular, setPopular] = useState<MediaItem[]>([]);
   const [featured, setFeatured] = useState<MediaItem | null>(null);
-  const [loading,  setLoading]  = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => { fetchPopular(); }, []);
 
   async function fetchPopular() {
     try {
-      const res  = await fetch(`${API_URL}/media/popular`);
-      const data: MediaItem[] = await res.json();
+      const token = await Storage.get('token');
+      const { data } = await api.get('/media/popular', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setPopular(data);
-      setFeatured(data.find((m) => m.backdrop) ?? data[0] ?? null);
+      setFeatured(data.find((m: MediaItem) => m.backdrop) ?? data[0] ?? null);
     } catch {
     } finally { setLoading(false); }
   }
@@ -33,7 +37,7 @@ export default function HomeScreen() {
   }
 
   const movies = popular.filter((m) => m.media_type === 'movie');
-  const shows  = popular.filter((m) => m.media_type === 'tv');
+  const shows = popular.filter((m) => m.media_type === 'tv');
 
   if (loading) return (
     <View style={s.center}><ActivityIndicator color={PURPLE} size="large" /></View>
@@ -54,16 +58,17 @@ export default function HomeScreen() {
         )}
 
         <Section title="Mais assistidos agora" data={popular} onPress={goToDetail} />
-        <Section title="Talvez você curta"      data={movies}  onPress={goToDetail} />
-        <Section title="Séries em alta"          data={shows}   onPress={goToDetail} />
+        <Section title="Talvez você curta" data={movies} onPress={goToDetail} />
+        <Section title="Séries em alta" data={shows} onPress={goToDetail} />
+        <View style={{ height: 40 }} />
+        <UpcomingSection onPress={(id) => goToDetail(id, 'movie')} />
 
-        <View style={{ height: 100 }} />
       </ScrollView>
     </View>
   );
 }
 
 const s = StyleSheet.create({
-  root:   { flex: 1, backgroundColor: BG },
+  root: { flex: 1, backgroundColor: BG },
   center: { flex: 1, backgroundColor: BG, alignItems: 'center', justifyContent: 'center' },
 });
