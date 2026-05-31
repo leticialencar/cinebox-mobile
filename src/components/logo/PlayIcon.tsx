@@ -1,20 +1,20 @@
-import React from 'react';
 import { View, StyleSheet } from 'react-native';
 
-export default function PlayIcon() {
-  return <View style={styles.playIcon} />;
+type Props = { size?: 'sm' | 'md' };
+
+export default function PlayIcon({ size = 'md' }: Props) {
+  const s = size === 'sm'
+    ? { borderTopWidth: 6, borderBottomWidth: 6, borderLeftWidth: 10, marginLeft: 2 }
+    : { borderTopWidth: 9, borderBottomWidth: 9, borderLeftWidth: 16, marginLeft: 3 };
+
+  return <View style={[styles.base, s]} />;
 }
 
 const styles = StyleSheet.create({
-  playIcon: {
-    width: 0,
-    height: 0,
-    borderTopWidth: 9,
-    borderBottomWidth: 9,
-    borderLeftWidth: 16,
+  base: {
+    width: 0, height: 0,
     borderTopColor: 'transparent',
     borderBottomColor: 'transparent',
-    borderLeftColor: '#ffffff',
-    marginLeft: 3,
+    borderLeftColor: '#fff',
   },
 });

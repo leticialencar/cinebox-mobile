@@ -2,22 +2,62 @@ import { FormField } from '@/components/FormField';
 import { BrandLogo } from '@/components/logo/BrandLogo';
 import PrimaryButton from '../../components/PrimaryButton';
 import { useRouter } from 'expo-router';
+import Storage from '@/utils/storage';
 import { useState } from 'react';
 import {
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  async function handleLogin() {
+    if (!email || !password) {
+      Alert.alert('Atenção', 'Preencha e-mail e senha.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        Alert.alert('Erro', data.message ?? 'Credenciais inválidas.');
+        return;
+      }
+
+      await Storage.set('token', data.token);
+      await Storage.set('user', JSON.stringify(data.user));
+
+      router.replace('/(protected)/home');
+    } catch (e) {
+      Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <KeyboardAvoidingView
@@ -58,7 +98,10 @@ export default function LoginScreen() {
           <Text style={styles.forgotText}>Esqueceu sua senha?</Text>
         </TouchableOpacity>
 
-        <PrimaryButton label="Entrar" onPress={() => {/* chamar login aqui */}} />
+        <PrimaryButton
+          label={loading ? 'Entrando...' : 'Entrar'}
+          onPress={handleLogin}
+        />
 
         <TouchableOpacity onPress={() => router.push('/(auth)/register')} style={styles.bottomLink}>
           <Text style={styles.bottomLinkText}>

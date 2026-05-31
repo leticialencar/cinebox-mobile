@@ -1,9 +1,11 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { StyleProp, ViewStyle } from 'react-native';
 
 type Props = {
   label: string;
   onPress: () => void;
+  style?: StyleProp<ViewStyle>;
 };
 
 export default function PrimaryButton({ label, onPress }: Props) {

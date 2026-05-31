@@ -1,9 +1,11 @@
 import { BrandLogo } from '@/components/logo/BrandLogo';
 import { FormField } from '@/components/FormField';
 import PrimaryButton from '@/components/PrimaryButton';
-import { useRouter } from 'expo-router';
+import Storage from '@/utils/storage';
+import { router, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -14,13 +16,69 @@ import {
   View,
 } from 'react-native';
 
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
 export default function RegisterScreen() {
-  const router = useRouter();
+  const localRouter = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [agreed, setAgreed] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  async function handleRegister() {
+    if (!name || !email || !password || !confirmPassword) {
+      Alert.alert('Atenção', 'Preencha todos os campos.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert('Atenção', 'As senhas não coincidem.');
+      return;
+    }
+    if (!agreed) {
+      Alert.alert('Atenção', 'Você precisa aceitar os Termos de Uso.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          password_confirmation: confirmPassword,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        const firstError = data.errors
+          ? (Object.values(data.errors) as string[][])[0][0]
+          : data.message ?? 'Erro ao cadastrar.';
+        Alert.alert('Erro', firstError);
+        return;
+      }
+
+      await Storage.set('token', data.token);
+      await Storage.set('user', JSON.stringify(data.user));
+
+      router.dismissAll();
+      router.replace('/(protected)/home' as any);
+    } catch (err) {
+      console.log('CATCH:', err);
+      Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <KeyboardAvoidingView
@@ -80,9 +138,12 @@ export default function RegisterScreen() {
           </Text>
         </TouchableOpacity>
 
-        <PrimaryButton label="Cadastrar" onPress={() => {}} />
+        <PrimaryButton
+          label={loading ? 'Cadastrando...' : 'Cadastrar'}
+          onPress={handleRegister}
+        />
 
-        <TouchableOpacity onPress={() => router.push('/login')} style={styles.bottomLink}>
+        <TouchableOpacity onPress={() => localRouter.push('/(auth)/login')} style={styles.bottomLink}>
           <Text style={styles.bottomLinkText}>
             Já tem conta?{' '}
             <Text style={styles.bottomLinkAccent}>Entrar</Text>
