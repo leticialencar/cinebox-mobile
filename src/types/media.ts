@@ -47,3 +47,12 @@ export type MediaDetail = {
   cast: CastMember[];
   userData: UserData;
 };
+
+export type SimilarMediaItem = {
+  id: number;
+  title: string;
+  poster: string | null;
+  rating: string;
+  release: string | null;
+  media_type: 'movie' | 'tv';
+};

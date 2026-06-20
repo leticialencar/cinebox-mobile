@@ -1,11 +1,5 @@
 import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
-
-type CastMember = {
-  id: number;
-  name: string;
-  character: string | null;
-  profile: string | null;
-};
+import type { CastMember } from '@/types/media';
 
 type Props = { cast: CastMember[] };
 
@@ -36,8 +30,8 @@ export function CastList({ cast }: Props) {
 
 const styles = StyleSheet.create({
   sectionLabel: { color: '#8b5cf6', fontSize: 14, fontWeight: '700', marginBottom: 10, marginTop: 20 },
-  item: { width: 72, alignItems: 'center' },
-  photo: { width: 56, height: 56, borderRadius: 28, marginBottom: 6, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
-  name: { color: '#fff', fontSize: 11, fontWeight: '600', textAlign: 'center' },
-  char: { color: 'rgba(255,255,255,0.35)', fontSize: 10, textAlign: 'center' },
+  item:         { width: 72, alignItems: 'center' },
+  photo:        { width: 56, height: 56, borderRadius: 28, marginBottom: 6, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  name:         { color: '#fff', fontSize: 11, fontWeight: '600', textAlign: 'center' },
+  char:         { color: 'rgba(255,255,255,0.35)', fontSize: 10, textAlign: 'center' },
 });

@@ -7,6 +7,7 @@ import { MediaInfoGrid } from '@/components/media/MediaInfoGrid';
 import { RatingCard } from '@/components/media/RatingCard';
 import { ReviewModal } from '@/components/media/ReviewModal';
 import { TrailerPlayer } from '@/components/media/TrailerPlayer';
+import { SimilarMedia } from '@/components/media/SimilarMedia';
 import { MediaDetail } from '@/types/media';
 import { api } from '@/services/api';
 import Storage from '@/utils/storage';
@@ -146,6 +147,8 @@ export default function MovieDetailScreen() {
           <CastList cast={data.cast} />
 
           <TrailerPlayer videoId={data.trailer} />
+
+          <SimilarMedia type="movie" id={id} />
 
           <View style={{ height: 20 }} />
         </View>
